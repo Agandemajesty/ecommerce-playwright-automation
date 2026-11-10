@@ -1,25 +1,62 @@
-import { test, expect } from '@playwright/test';
 
-test('ECOM_001 - Verify successful customer login', async ({ page }) => {
+import { test } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+import { users } from '../test-data/users';
 
-  // Navigate to the application
-  await page.goto('/');
+test.describe('E-commerce Authentication Module', () => {
 
-  // Enter valid username
-  await page.locator('[data-test="username"]').fill('standard_user');
+  test('ECOM_001 - Verify successful customer login', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
-  // Enter valid password
-  await page.locator('[data-test="password"]').fill('secret_sauce');
+    await loginPage.navigate();
+    await loginPage.login(
+      users.standardUser.username,
+      users.standardUser.password
+    );
 
-  // Click the login button
-  await page.locator('[data-test="login-button"]').click();
+    await loginPage.verifyLoginSuccessful();
+  });
 
-  // Verify successful login
-  await expect(page).toHaveURL(/inventory.html/);
+  test('ECOM_002 - Verify login with locked-out user', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
-  // Verify products page is displayed
-  await expect(page.locator('.inventory_list')).toBeVisible();
+    await loginPage.navigate();
+    await loginPage.login(
+      users.lockedOutUser.username,
+      users.lockedOutUser.password
+    );
 
-  await expect(page.locator('.title')).toHaveText('Products');
+    await loginPage.verifyLoginError(
+      'Sorry, this user has been locked out.'
+    );
+  });
+
+  test('ECOM_003 - Verify login with invalid credentials', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
+    await loginPage.navigate();
+    await loginPage.login(
+      users.invalidUser.username,
+      users.invalidUser.password
+    );
+
+    await loginPage.verifyLoginError(
+      'Username and password do not match any user in this service'
+    );
+  });
+
+  test('ECOM_004 - Verify login with empty credentials', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
+    await loginPage.navigate();
+    await loginPage.login(
+      users.emptyUser.username,
+      users.emptyUser.password
+    );
+
+    await loginPage.verifyLoginError(
+      'Username is required'
+    );
+  });
 
 });

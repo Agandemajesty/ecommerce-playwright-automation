@@ -27,14 +27,18 @@ export default defineConfig({
   use: {
   baseURL: 'https://www.saucedemo.com/',
 
+  headless: false,
+
+  launchOptions: {
+    slowMo: 1000,
+  },
+
   screenshot: 'only-on-failure',
 
   video: 'retain-on-failure',
-
-  trace: 'retain-on-failure',
   
-  },
-
+  trace: 'retain-on-failure',
+},
   /* Configure projects for major browsers */
   projects: [
     {
